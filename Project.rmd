@@ -1,0 +1,228 @@
+---
+title: Airbnb's Impact on the Housing and Rental Price in Los Angeles
+author:
+  - name: Chaeyoung Lee
+  - name: Hoseok Yoo
+  - name: Byungwoo Kang
+  - name: Piper Jeong Ho Kim
+affiliation:
+  - num: 1
+    address: University of California, Los Angeles (UCLA)
+primary_colour: "#2774AE"
+column_numbers: 3
+logoright_name: 1003px-UCLA_Bruins_script_logo.png
+logoleft_name:
+body_textsize: "43px"
+output: 
+  posterdown::posterdown_html:
+  self_contained: yes
+  mode: selfcontained
+bibliography: packages.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Introduction
+
+Airbnb is one of the popular home rental service platforms. Compared to the existing hotel industry, reservations are convenient, and rentals are well-distributed in a variety of neighbourhoods from the city center to suburban areas. However, Airbnb can contribute to imbalance economic development, as travelers are its main users. In this research, we will explore whether Airbnb’s supply and demand, or price is generating gentrification in terms of economics. Obviously, Los Angeles is one of the major tourist cities in the United States, where about 50 million tourists have visited annually. Nevertheless, considering the fact that tourist attractions and development areas of Los Angeles county are not evenly distributed, Airbnb rentals that belong to residential areas may have less listings compared to the tourist attractions or urban areas. Through this research, we will also compare the number of rentals listings by region to identify potential regional preferences of tourists. 
+
+# Background
+
+Airbnb, Inc. is an American vacation rental company that connects people who want to rent out their homes with people who are looking for accommodations in a specific area through an online marketplace. Airbnb generates its revenue from receiving commissions from each booking. However, there has been increasing criticism for Airbnb in cities as their presence has created an increase in rent prices which influences the lives of the residents that live near the leased properties. In addition to creating conflicts for the hotel industry. Airbnb has been privately valued at $31 billion and will be listed as a public company in mid December 2020.
+
+# Research Goals and Hypothesis
+
+Lately, society has seen a demand for rental service platforms, especially among adults. One of the most popular rental service platforms among young adults include “Airbnb”. Airbnb, Inc which has a nice system of reservation and easy accessibility are well-distributed in a city or suburban areas. However, is there a price difference between urban and suburban cities, or popular and unpopular areas? or is there a significant difference between urban and suburban cities in terms of the number of rental listings? The goal of this poster is to highlight the findings of difference analysis of rent price depending on major or popular location/area. The running hypothesis is that there will be obvious rent price differences about location/areas and time.
+
+```{r out.width='100%', fig.align='center', fig.height=3.5, message=F, warning=F, echo=F, result=F}
+library(wordcloud)
+library(widgetframe)
+library(wordcloud2)
+library(tm)
+
+listings <- read.csv("cleaned_dataset_og.csv")
+text <- listings$neighbourhood
+docs <- Corpus(VectorSource(text))
+
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+
+set.seed(1)
+# cloud <- wordcloud2(data.frame(df$word, df$freq), color = "random-light")
+# saveWidget(cloud,"1.html",selfcontained = F)
+# webshot::webshot("1.html","1.png",vwidth = 700, vheight = 500, delay =10)
+
+wordcloud(words = df$word, freq = df$freq, min.freq = 1,           max.words=500, random.order=FALSE, rot.per=0.35, colors=brewer.pal(8, "Dark2"))
+```
+
+# Methods & Results
+To begin, the Los Angeles Airbnb dataset was obtained from Inside Airbnb. In order to run a successful exploratory data analysis, the data went through a cleaning process where it was checked for any missing value and outliers. We have removed rows that include NAs and have 0 in price columns and outliers that we believed were not reasonable through our manual inspections.
+
+Using our cleaned data, we visualized the correlation between the variables price and neighborhood using the package 'dplyr' and tableau. In order to look at the distribution of airbnb listings across Los Angeles, we have created the density plot of average prices of the listings for different neighborhoods.
+
+```{r, out.width='100%', fig.align='center', fig.cap='Distribution of Airbnb listings price over Los Angeles', fig.height=8, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(DT)
+
+N <- listings %>%
+  select(neighbourhood) %>% 
+  group_by(neighbourhood) %>% 
+  summarise(n= n())
+N <- as.data.frame(N)
+Nnew <- N[order(N$n, decreasing=T),]
+
+Location <- listings %>%
+  select(neighbourhood, longitude, latitude) %>%
+  group_by(neighbourhood) %>% 
+  summarise(mlong=mean(longitude, na.rm=TRUE), mlat=mean(latitude, na.rm=TRUE))
+
+df <- full_join(N, Location, by="neighbourhood")
+
+Price <- listings %>% 
+  select(neighbourhood, room_type, price) %>% 
+  group_by(neighbourhood) %>% 
+  summarise(mean_price = round(mean(price),2))
+# Number of the neighbourhoods
+Price <- as.data.frame(Price)
+Pnew <- Price[order(Price$mean_price, decreasing=T),]
+df <- full_join(df, Price, by="neighbourhood" )
+
+library(leaflet)
+library(rgdal)
+
+# PRICE DISTRIBUTION
+Pdist <- leaflet() %>% 
+  setView(lng = -118.365, lat = 34.07374, zoom = 11) %>%
+  addProviderTiles("CartoDB.Positron") %>% 
+   addCircles(
+    data = df,
+    lng = df$mlong,
+    lat = df$mlat,
+    radius = df$mean_price*10, 
+    color = "#000000",
+    weight = 0.2,
+    fillColor ="#2774AE",
+    fillOpacity = 0.5)
+
+Pdist
+# htmlwidgets::saveWidget(Pdist, file = "Pdist.html", selfcontained = TRUE)
+# frameWidget(Pdist)
+```
+
+```{r, out.width='100%', fig.align='center', fig.cap='Distribution of Airbnb listings frequency over Los Angeles', fig.height=8, message=FALSE, warning=FALSE, echo=FALSE}
+Fdist <- leaflet() %>%
+  setView(lng = -118.365, lat = 34.07374, zoom = 11) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+   addCircles(
+    data = df,
+    lng = df$mlong,
+    lat = df$mlat,
+    radius = df$n*10,
+    color = "#000000",
+    weight = 0.2,
+    fillColor ="#2774AE",
+    fillOpacity = 0.5)
+
+Fdist
+# htmlwidgets::saveWidget(Fdist, file = "Pdist.html", selfcontained = TRUE)
+# frameWidget(Fdist)
+```
+
+We examined that the neighborhoods in West Los Angeles generally have the higher number of Airbnb rooms and price. The frequency density plot and price density plot show much overlap in their distribution over Los Angeles, though price density plot shows that rooms along the coast have the higher price. 
+Using dplyr, we have examined that the top 5 airbnb listing neighborhoods, in number, are Venice, Hollywood, Downtown, Hollywood Hills and Silver Lake. The top 5 airbnb listing locations, in price, are Beverly Crest, Bel-Air, Hollywood Hills West, Encino and Pacific Palisades. Figure 1 also shows that Words, such as “venice”, “downtown”, and ”hollywood”, describing tourism hotspots in West Los Angeles nearby appeared the most frequently. 
+
+In order to more closely examine the price difference by the location of a listing, we conducted a t-test. We first clustered a total of 112 neighborhoods into either West LA group or non-West LA group by manually going through them in Wikipedia, and ran a t-test on the price of a listing in West LA or the rest of the LA, as visually West LA was the most dense in frequency and price of listings. The result shows that there is a significant difference in the prices of a listing for those that are located in West LA and the rest of the LA areas. Additionally, by clustering the neighborhoods according to their locations in LA, we have once again confirmed that neighborhoods with the higher number of rooms and prices are located where all tourism hotspots are densely in place - such as Venice, Beverly Hills and Pacific Palisades - the places where the housing market has been becoming more competitive with their overpriced real estate properties. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(DT)
+
+WEST <- c("Beverly Crest", "Beverly Grove", "Beverlywood", "Brentwood", "Century City", "Cheviot Hills", "Pico-Robertson", "Carthay", "Rancho Park", "Bel-Air", "Century City", "Pacific Palisades", "Venice", "West Los Angeles", "Del Rey", "Harbor City", "Harbor Gateway", "Mar Vista", "Palms", "Playa Vista", "Porter Ranch", "Rancho Park", "Sawtelle", "Venice", "Westchester",	"Westlake", "Westwood")
+
+NORTH <- c("Arleta", "Atwater Village", "Canoga Park", "Chatsworth", "Cypress Park", "Eagle Rock", "Encino", 	"Glassell Park", "Granada Hills",	 "Lake Balboa", "Lake View Terrace", "Mission Hills", "Montecito Heights", "Mount Washington", "North Hills", "North Hollywood", "Northridge", "Pacoima", "Panorama City", "Pico-Robertson", "Reseda", "Sepulveda Basin",	"Shadow Hills",	 "Sherman Oaks", "Studio City", "Sun Valley", "Sunland", "Sylmar", "Tarzana", "Toluca Lake", "Tujunga", "Valley Village", "Van Nuys", "West Hills", "Winnetka", "Woodland Hills", "Highland Park")	
+
+SOUTH <- c("Adams-Normandie", "Baldwin Hills/Crenshaw", "Broadway-Manchester", "Central-Alameda", "Chesterfield Square", "Exposition Park", "Florence", "Gramercy Park", "Green Meadows", "Harvard Park", "Historic South-Central", "Hyde Park", "Jefferson Park", "Leimert Park", "Manchester Square", "Playa del Rey", "Porter Ranch", "San Pedro", "South Park", "University Park", "Valley Glen", "Vermont-Slauson", "Vermont Knolls", "Vermont Square", "Vermont Vista", "Watts", "West Adams", "Wilmington")
+
+EAST <- c("Boyle Heights", "Cypress Park", "Eagle Rock", "El Sereno", "Glassell Park", "Lincoln Heights", "Montecito Heights", "Mount Washington", "Silver Lake", "Valley Glen", "Highland Park")
+
+CENTRAL <- c("Arlington Heights", "Carthay", "Chinatown", "Downtown", "East Hollywood", "Echo Park", "Elysian Park", "Elysian Valley", "Fairfax", "Griffith Park", "Hancock Park", "Harvard Heights", "Harvard Park", "Hollywood", "Hollywood Hills", "Hollywood Hills West", "Koreatown", "Larchmont", "Los Feliz", "Mid-City", "Mid-Wilshire", "Pico-Robertson", "Pico-Union", "Silver Lake", "Windsor Square")
+
+# length(unique(c(SOUTH, NORTH, WEST, EAST, CENTRAL))) #in total 112 cities
+
+listings$location1 <- NA
+listings$location2 <- NA
+
+North <- c()
+West <- c()
+East <- c()
+Central <- c()
+South <- c()
+
+for (i in 1:length(listings[,1])){
+  if (listings$neighbourhood[i] %in% NORTH){
+    if (is.na(listings$location1[i])){
+      listings$location1[i] <- "NORTH"
+      North <- c(North, i)
+    }else {listings$location2[i] <- "NORTH"
+      North <- c(North, i)}}
+  if (listings$neighbourhood[i] %in% WEST){
+    if (is.na(listings$location1[i])){
+      listings$location1[i] <- "WEST"
+      West <- c(West, i)
+    }else {listings$location2[i] <- "WEST"}
+    West <- c(West, i)}
+  if (listings$neighbourhood[i] %in% EAST){
+    if (is.na(listings$location1[i])){
+      listings$location1[i] <- "EAST"
+      East <- c(East, i)
+    }else {listings$location2[i] <- "EAST"
+      East <- c(East, i)}}
+  if (listings$neighbourhood[i] %in% CENTRAL){
+    if (is.na(listings$location1[i])){
+      listings$location1[i] <- "CENTRAL"
+      Central <- c(Central, i)
+    }else {listings$location2[i] <- "CENTRAL"
+      Central <- c(Central, i)}}
+  if (listings$neighbourhood[i] %in% SOUTH){
+    if (is.na(listings$location1[i])){
+      listings$location1[i] <- "SOUTH"
+      South <- c(South, i)
+    }else {listings$location2[i] <- "SOUTH"
+      South <- c(South, i)}}
+}
+
+NorthPrice <- listings$price[North]
+SouthPrice <- listings$price[South]
+WestPrice <- listings$price[West]
+CentralPrice <- listings$price[Central]
+EastPrice <- listings$price[East]
+AllPrice <- listings$price[c(North, South, Central, East)]
+
+library(pander)
+result <- t.test(WestPrice, AllPrice)
+pander(result)
+```
+
+
+# Conclusion
+
+As shown in our data analysis output, there was a significant difference between rental listings and rental prices in West LA, where attractions such as tourism hotspots are concentrated. In the competitive market we live in, the market price is determined by supply and demand at a certain level. According to our map plot, rental listings in West LA are obviously higher than the rest of the neighbourhoods, which implies that this high supply may tell us that tourists’ demand is relatively high. However, price bubbles can theoretically occur when the quantity of demand and quantity of supply do not match. Compared to the amount of LA tourists, which is about 50 million per year, the supply of accommodation in West LA can be short to accommodate tourists, and this short supply can eventually lead to a rental price bubble.
+
+To continue our research on how airbnb listings might be associated with the price of real estate properties, especially in West LA where it is full of tourists and a heavy number of airbnb listings, we dived into researching articles and papers. It directed us to an article that has already discussed airbnb listings’ impact on the real estate properties - It refers to it as “airbnb effect” and states that “a 1% increase in Airbnb listings is causally associated with a 0.018% increase in rental rates and a 0.026% increase in house prices” (Barron). They also added that considering Airbnb’s rapid growth, the impact would start to influence the lives of actual residents.
+In West LA, where airbnb listings are heavily dense compared to other neighborhoods due to its tourism hotspots, it is certainly possible that airbnb is already contributing to the increase in the rental and housing price. Los Angeles, especially West LA, should be cautious not to get its rental and housing prices under the so-called airbnb effect, which may lead onto other problems such as gentrification and overcrowdedness. 
+
+
+```{r, include=FALSE}
+knitr::write_bib(c('knitr','rmarkdown','posterdown','pagedown'), 'packages.bib')
+```
+
+# Limitations and Next Steps
+The data we used was collected from a publicly available source, and with publicly available data there is always the possible limitation that there could be inaccuracies or mis reporting of data. As for the next steps that policy makers should take to reduce the increased cost of living for local residents and the struggles of hotel and hostel industries would be to limit the number of homes that are allowed to enter the market of short term rentals.
+
+# References
+1.The airbnb data: http://insideairbnb.com/get-the-data.html \
+2. Barron, K., Kung, E., & Prosperio, D. (2019, April 17). Research: When Airbnb Listings in a City Increase, So Do Rent Prices. Harvard Business Review. https://hbr.org/2019/04/research-when-airbnb-listings-in-a-city-increase-so-do-rent-prices
