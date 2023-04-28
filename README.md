@@ -19,7 +19,7 @@
 <img width="458" alt="스크린샷 2023-04-28 오후 5 54 55" src="https://user-images.githubusercontent.com/101457515/235102794-76938d33-80b8-4704-aa3b-6e77e2944d0a.png">
 
 - **References**
-  - 1. The airbnb data: http://insideairbnb.com/get-the-data.html
-  - 2. Barron, K., Kung, E., & Prosperio, D. (2019, April 17). Research: When Airbnb Listings in a City Increase, So Do Rent Prices. Harvard Business            Review. https://hbr.org/2019/04/research-when-airbnb-listings-in-a-city-increase-so-do-rent-prices
+  - The airbnb data: http://insideairbnb.com/get-the-data.html
+  - Barron, K., Kung, E., & Prosperio, D. (2019, April 17). Research: When Airbnb Listings in a City Increase, So Do Rent Prices. Harvard Business            Review. https://hbr.org/2019/04/research-when-airbnb-listings-in-a-city-increase-so-do-rent-prices
      
 <br><br>
