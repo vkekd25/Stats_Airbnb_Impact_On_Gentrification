@@ -12,10 +12,10 @@
 
 - **프로젝트 결과**  
 
-[시각화 결과]
+[시각화 결과]  
 <img width="601" alt="스크린샷 2023-04-28 오후 5 55 53" src="https://user-images.githubusercontent.com/101457515/235103019-fb5fe17f-edef-4da2-bdf6-dffa735126a0.png">
 
-[통계 결과]
+[통계 결과]  
 <img width="458" alt="스크린샷 2023-04-28 오후 5 54 55" src="https://user-images.githubusercontent.com/101457515/235102794-76938d33-80b8-4704-aa3b-6e77e2944d0a.png">
 
 - **References**
