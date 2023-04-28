@@ -1,4 +1,4 @@
-# Airbnb-s-impact-on-gentrification
+# Airbnb's Impact on Gentrification(통계 컨설팅 프로젝트)
 
 - **프로젝트 주제**
   - Airbnb’s Impact on the Housing and Rental Price in Los Angeles
