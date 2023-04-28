@@ -6,9 +6,9 @@
 - **프로젝트 개요**
   - Airbnb's Housing and Rental Price 데이터 수집
   - 정제되지않은 데이터들 전처리
-  - LA의 Airbnb's Housing and Rental Price을 Wordcloud 및 Bubble Chat 시각화
-  - LA의 서부와 서부아닌 지역안에 Airbnb's Housing and Rental Price값 평균 Two Sample T-test 통계분석
-  - Limitations and Next Steps
+  - Los Angeles의 Airbnb's Housing and Rental Price을 Wordcloud 및 Bubble Chat 시각화
+  - Los Angeles의 서부와 서부아닌 지역안에 Airbnb's Housing and Rental Price값 평균 Two Sample T-test 통계분석
+  - 한계점 및 계선방안
 
 - **프로젝트 결과**  
 
